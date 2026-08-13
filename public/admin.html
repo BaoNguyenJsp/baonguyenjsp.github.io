@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quản lý — Món Quà Bí Ẩn</title>
+<link rel="stylesheet" href="/public/style.css">
+</head>
+<body class="admin">
+  <header>
+    <h1>⚙️ Quản lý</h1>
+    <div class="header-btns">
+      <a class="btn" href="/">🏠 Màn hình chính</a>
+      <button id="btn-reset" class="btn danger">🔄 Đặt lại</button>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabs">
+      <button class="tab active" data-tab="tab-quests">📋 Nhiệm vụ</button>
+      <button class="tab" data-tab="tab-players">👥 Người chơi</button>
+      <button class="tab" data-tab="tab-points">📒 Sổ điểm</button>
+      <button class="tab" data-tab="tab-report">📊 Báo cáo</button>
+    </nav>
+
+    <section id="tab-quests">
+      <div class="card">
+        <div class="card-head">
+          <h2>Nhiệm vụ</h2>
+          <button id="btn-new-quest" class="btn">➕ Mới</button>
+        </div>
+        <p class="small" style="margin-bottom:4px">Chọn (✓) lên đến 3 nhiệm vụ cho vòng tới.</p>
+        <p class="small" style="margin-bottom:10px">Điểm tự động theo loại: <b>Normal = 1</b>, <b>Weekly = 2</b>, <b>Special = 3</b>, <b>Super Special = 5</b>.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th class="center">Chọn</th><th>Tên</th><th>Loại</th><th>Điểm</th><th>Hành động</th></tr></thead>
+            <tbody id="quest-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-players" hidden>
+      <div class="card">
+        <div class="card-head">
+          <h2>Người chơi</h2>
+          <button id="btn-new-player" class="btn">➕ Mới</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Tên</th><th>Điểm</th><th>Điều chỉnh</th><th>Hành động</th></tr></thead>
+            <tbody id="player-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-points" hidden>
+      <div class="card">
+        <div class="card-head"><h2>Sổ điểm</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Ngày</th><th>Người chơi</th><th>Điểm</th><th>Lý do</th></tr></thead>
+            <tbody id="ledger-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-report" hidden>
+      <div class="card">
+        <div class="card-head"><h2>Báo cáo hoạt động</h2></div>
+        <div class="stat-cards" id="report-stats"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Hạng</th><th>Người chơi</th><th>Điểm</th><th>Nhiệm vụ hoàn thành</th><th>TB điểm/nhiệm vụ</th></tr></thead>
+            <tbody id="report-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-quest" class="modal" hidden>
+    <div class="modal-box">
+      <h2 id="quest-modal-title">➕ Thêm nhiệm vụ</h2>
+      <form id="quest-form">
+        <div class="field">
+          <label for="q-name">Tên nhiệm vụ</label>
+          <input id="q-name" style="min-width: 380px;" required>
+        </div>
+        <div class="field">
+          <label for="q-type">Loại</label>
+          <select id="q-type" style="min-width: 380px;">
+            <option value="Normal">Normal</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Special">Special</option>
+            <option value="Once">Super Special</option>
+          </select>
+          <p class="small" style="margin-top:4px">Điểm tự động: <b id="q-points-hint">1</b></p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" data-close>Hủy</button>
+          <button class="btn" type="submit">Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-player" class="modal" hidden>
+    <div class="modal-box">
+      <h2>➕ Thêm người chơi</h2>
+      <form id="player-form">
+        <div class="field">
+          <label for="p-name">Tên người chơi</label>
+          <input id="p-name" required style="min-width: 380px;">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" data-close>Hủy</button>
+          <button class="btn" type="submit">Thêm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/public/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 330">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="65%" r="75%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="55%" stop-color="#6d28d9"/>
+      <stop offset="100%" stop-color="#2e1065"/>
+    </radialGradient>
+    <linearGradient id="box" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+    <linearGradient id="lid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fb923c"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="400" height="330" fill="url(#bg)"/>
+
+  <!-- stars -->
+  <g fill="#fde047" opacity=".9">
+    <circle cx="38" cy="42" r="3"/><circle cx="118" cy="86" r="2.2"/>
+    <circle cx="300" cy="52" r="3"/><circle cx="352" cy="120" r="2.2"/>
+    <circle cx="205" cy="28" r="2.6"/><circle cx="70" cy="160" r="2"/>
+    <circle cx="330" cy="210" r="2"/>
+  </g>
+
+  <!-- sparkles -->
+  <g>
+    <path d="M150 70 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z" fill="#fde047"/>
+    <path d="M300 90 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z" fill="#4ade80"/>
+    <path d="M240 40 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5z" fill="#60a5fa"/>
+    <path d="M100 110 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5z" fill="#f472b6"/>
+  </g>
+
+  <!-- confetti -->
+  <g>
+    <rect x="150" y="80" width="9" height="15" rx="2" fill="#4ade80" transform="rotate(18 154 87)"/>
+    <rect x="236" y="98" width="9" height="15" rx="2" fill="#60a5fa" transform="rotate(-22 240 105)"/>
+    <rect x="178" y="52" width="9" height="15" rx="2" fill="#f472b6" transform="rotate(40 182 59)"/>
+    <rect x="128" y="120" width="9" height="15" rx="2" fill="#fb923c" transform="rotate(-35 132 127)"/>
+    <rect x="268" y="60" width="9" height="15" rx="2" fill="#a78bfa" transform="rotate(12 272 67)"/>
+  </g>
+
+  <!-- balloon -->
+  <g>
+    <ellipse cx="96" cy="100" rx="16" ry="21" fill="#f472b6"/>
+    <polygon points="96,119 89,129 103,129" fill="#db2777"/>
+    <path d="M96 129 q4 14 -6 30" stroke="#f472b6" stroke-width="2.4" fill="none"/>
+  </g>
+
+  <!-- small gift popping up -->
+  <g>
+    <rect x="212" y="140" width="38" height="34" rx="4" fill="#4ade80"/>
+    <rect x="212" y="128" width="38" height="14" rx="3" fill="#22c55e"/>
+    <rect x="226" y="128" width="10" height="46" fill="#fde047"/>
+  </g>
+
+  <!-- floating lid -->
+  <g transform="translate(190 130) rotate(28 20 10)">
+    <rect x="0" y="0" width="110" height="22" rx="5" fill="url(#lid)"/>
+    <rect x="46" y="0" width="18" height="22" fill="#fde047"/>
+  </g>
+
+  <!-- rays from the open box -->
+  <g stroke="#fde047" stroke-width="5" stroke-linecap="round" opacity=".85">
+    <line x1="200" y1="205" x2="120" y2="100"/>
+    <line x1="200" y1="205" x2="200" y2="80"/>
+    <line x1="200" y1="205" x2="282" y2="100"/>
+    <line x1="200" y1="205" x2="86" y2="150"/>
+    <line x1="200" y1="205" x2="314" y2="150"/>
+  </g>
+
+  <!-- glow behind box -->
+  <ellipse cx="200" cy="215" rx="110" ry="70" fill="#fde047" opacity=".22"/>
+
+  <!-- big gift box -->
+  <g>
+    <rect x="142" y="212" width="116" height="100" rx="6" fill="url(#box)"/>
+    <rect x="186" y="212" width="28" height="100" fill="url(#gold)"/>
+    <ellipse cx="200" cy="210" rx="52" ry="9" fill="#450a0a"/>
+  </g>
+
+  <!-- ground glow -->
+  <ellipse cx="200" cy="320" rx="130" ry="12" fill="#fde047" opacity=".18"/>
+</svg>
