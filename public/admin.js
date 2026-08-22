@@ -5,10 +5,26 @@ const TYPE_TAG = { Once: 'Super Special', Special: 'Special', Weekly: 'Weekly', 
 const TYPE_COLOR = { Once: 'q-red', Special: 'q-yellow', Weekly: 'q-green', Normal: 'q-gray' };
 const TYPE_POINTS = { Normal: 1, Weekly: 2, Special: 3, Once: 5 };
 
+const BASE = 'https://script.google.com/macros/s/AKfycbwFTPEd83CQnuMwX-Scyt68xMZv5tPLSrYAi4hRO5raysh8nBCbPSakF9-GtD8-M5O7vQ/exec'; // Apps Script web app /exec URL (replace after deploy)
+let ADMIN_KEY = sessionStorage.getItem('adminKey');
+if (!ADMIN_KEY) { ADMIN_KEY = prompt('Nhập mã admin:') || ''; if (ADMIN_KEY) sessionStorage.setItem('adminKey', ADMIN_KEY); }
+function route(url, body = {}) {
+  let m;
+  if ((m = url.match(/\/api\/admin\/players\/(\d+)\/points$/))) return { p: 'admin/player/points', body: { ...body, id: m[1] } };
+  if ((m = url.match(/\/api\/admin\/players\/(\d+)$/))) return { p: 'admin/player/delete', body: { ...body, id: m[1] } };
+  if ((m = url.match(/\/api\/admin\/quests\/(\d+)$/))) return { p: 'admin/quest/delete', body: { ...body, id: m[1] } };
+  const p = url.replace(/^\/api\//, '');
+  return { p: ({ 'admin/players': 'admin/player', 'admin/quests': 'admin/quest' })[p] || p, body };
+}
 async function api(url, method = 'GET', body) {
-  const res = await fetch(url, { method, headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined });
+  const r = route(url, body);
+  const res = await fetch(BASE + '?p=' + encodeURIComponent(r.p), {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(r.p.startsWith('admin/') ? { ...r.body, key: ADMIN_KEY } : r.body),
+  });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Lỗi');
+  if (data && data.error) throw new Error(data.error);
   return data;
 }
 

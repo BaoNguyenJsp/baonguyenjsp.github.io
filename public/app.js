@@ -28,8 +28,13 @@ function buildCover() {
 }
 buildCover();
 
+const BASE = 'https://script.google.com/macros/s/AKfycbwFTPEd83CQnuMwX-Scyt68xMZv5tPLSrYAi4hRO5raysh8nBCbPSakF9-GtD8-M5O7vQ/exec'; // Apps Script web app /exec URL (replace after deploy)
 async function api(url, method = 'GET', body) {
-  const res = await fetch(url, { method, headers: body ? { 'Content-Type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined });
+  const res = await fetch(BASE + '?p=' + encodeURIComponent(url.replace(/^\/api\//, '')), {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(body || {}),
+  });
   return res.json();
 }
 
@@ -63,23 +68,38 @@ function renderQuests(set, doneIds) {
 }
 
 let currentQ = null;
+// Two-half player grid: right half (cols 4-6) = players 1..PLAYER_SPLIT-1 left-to-right,
+// left half (cols 1-3) = players PLAYER_SPLIT..end right-to-left.
+const PLAYER_SPLIT = 12;
 function openPlayerModal(q) {
   currentQ = q;
   selected.clear();
   const grid = $('player-grid');
   grid.innerHTML = '';
-  for (const p of state.players) {
-    const c = document.createElement('div');
-    c.className = 'cell';
-    c.textContent = p.name;
-    c.dataset.id = p.id;
-    c.onclick = () => {
-      const id = c.dataset.id;
-      if (selected.has(id)) { selected.delete(id); c.classList.remove('selected'); }
-      else { selected.add(id); c.classList.add('selected'); }
+  const right = state.players.slice(0, PLAYER_SPLIT - 1);
+  const left = state.players.slice(PLAYER_SPLIT - 1);
+  const rows = Math.max(Math.ceil(left.length / 3), Math.ceil(right.length / 3));
+  const cell = p => {
+    const el = document.createElement('div');
+    el.className = 'cell';
+    if (!p) { el.style.visibility = 'hidden'; return el; }
+    el.textContent = p.name;
+    el.dataset.id = p.id;
+    el.onclick = () => {
+      const id = el.dataset.id;
+      if (selected.has(id)) { selected.delete(id); el.classList.remove('selected'); }
+      else { selected.add(id); el.classList.add('selected'); }
       $('sel-count').textContent = 'Đã chọn: ' + selected.size;
     };
-    grid.appendChild(c);
+    return el;
+  };
+  for (let r = 0; r < rows; r++) {
+    grid.appendChild(cell(left[3 * r + 2]));   // col 1
+    grid.appendChild(cell(left[3 * r + 1]));   // col 2
+    grid.appendChild(cell(left[3 * r]));       // col 3
+    grid.appendChild(cell(right[3 * r]));      // col 4
+    grid.appendChild(cell(right[3 * r + 1]));  // col 5
+    grid.appendChild(cell(right[3 * r + 2]));  // col 6
   }
   $('sel-count').textContent = 'Đã chọn: 0';
   $('modal-player').hidden = false;
