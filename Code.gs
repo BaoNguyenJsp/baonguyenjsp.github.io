@@ -248,7 +248,8 @@ function saveQuest(data) {
     const name = String(data.name || '').trim();
     if (!name) throw new Error('Tên nhiệm vụ không được để trống');
     const q = data.id ? quests.find(q => String(q.id) === String(data.id)) : null;
-    const body = { name, type: data.type, points: String(TYPE_POINTS[data.type] || 2) };
+    const pts = data.points == null || data.points === '' ? (TYPE_POINTS[data.type] || 2) : Math.max(0, Number(data.points) || 0);
+    const body = { name, type: data.type, points: String(pts) };
     if (q) Object.assign(q, body);
     else quests.push({ id: nextId(quests), ...body });
     writeTable('quests', quests);
@@ -324,7 +325,7 @@ function migrateQuestTypes() {
     let changed = false;
     const quests = readTable('quests').map(q => {
       const type = map[q.type] || q.type;
-      if (type !== q.type || q.points !== String(TYPE_POINTS[type])) { q.type = type; q.points = String(TYPE_POINTS[type]); changed = true; }
+      if (type !== q.type) { q.type = type; changed = true; }
       return q;
     });
     if (changed) writeTable('quests', quests);

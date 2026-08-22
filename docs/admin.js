@@ -4,7 +4,7 @@ let nextSet = [];
 const TYPE_COLOR = { Normal: 'q-green', Medium: 'q-yellow', Hard: 'q-red' };
 const TYPE_POINTS = { Normal: 2, Medium: 5, Hard: 10 };
 
-const BASE = 'https://script.google.com/macros/s/AKfycbxx1yOQiqlL5SrnfeDIHo56u5qcVjjQleuWLOLTG3fCGmyUzlaK3mJIDeL7M7oCmxBfRQ/exec'; // Apps Script web app /exec URL (replace after deploy)
+const BASE = 'https://script.google.com/macros/s/AKfycbwauLUNRgCuCPYq-RyHwuGbLJ-JgeDGVF4o11iYj8-upL01IC-ihrF0vnBFVTPXD7OmBw/exec'; // Apps Script web app /exec URL (replace after deploy)
 let ADMIN_KEY = sessionStorage.getItem('adminKey');
 if (!ADMIN_KEY) { ADMIN_KEY = prompt('Nhập mã admin:') || ''; if (ADMIN_KEY) sessionStorage.setItem('adminKey', ADMIN_KEY); }
 function route(url, body = {}) {
@@ -74,6 +74,7 @@ async function loadAll() {
   nextSet = state.nextSet;
   allPlayers = players.players;
   renderQuests(quests.quests);
+  renderNextSetCount();
   renderPlayers(players.players);
   renderLedger(points.points);
   renderReport(report.report);
@@ -81,6 +82,10 @@ async function loadAll() {
 }
 
 // ---- Quests ----
+function renderNextSetCount() {
+  $('nextset-count').textContent = 'Đã chọn ' + nextSet.length + '/3';
+}
+
 function renderQuests(quests) {
   const tbody = $('quest-tbody');
   tbody.innerHTML = '';
@@ -92,10 +97,13 @@ function renderQuests(quests) {
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = nextSet.includes(String(q.id));
-    cb.onchange = async () => {
-      nextSet = cb.checked ? [...nextSet, String(q.id)].slice(-3) : nextSet.filter(i => i !== String(q.id));
-      await api('/api/admin/nextSet', 'POST', { questIds: nextSet });
-      loadAll();
+    cb.disabled = !cb.checked && nextSet.length >= 3;
+    cb.title = cb.disabled ? 'Tối đa 3 nhiệm vụ' : '';
+    cb.onchange = () => {
+      nextSet = cb.checked ? [...nextSet, String(q.id)] : nextSet.filter(i => i !== String(q.id));
+      renderQuests(quests);
+      renderNextSetCount();
+      applyFilters();
     };
     tdChk.appendChild(cb);
     const tdAct = document.createElement('td');
@@ -124,13 +132,13 @@ function openQuestModal(q) {
   $('quest-modal-title').textContent = q ? '✏️ Sửa nhiệm vụ' : '➕ Thêm nhiệm vụ';
   $('q-name').value = q ? q.name : '';
   $('q-type').value = q ? q.type : 'Normal';
+  $('q-points').value = q ? q.points : TYPE_POINTS[$('q-type').value];
   $('quest-form').dataset.id = q ? q.id : '';
-  syncType();
   $('modal-quest').hidden = false;
 }
 
 function syncType() {
-  $('q-points-hint').textContent = TYPE_POINTS[$('q-type').value];
+  $('q-points').value = TYPE_POINTS[$('q-type').value];
 }
 $('q-type').onchange = syncType;
 
@@ -140,6 +148,7 @@ $('quest-form').onsubmit = async e => {
     id: $('quest-form').dataset.id || null,
     name: $('q-name').value.trim(),
     type: $('q-type').value,
+    points: $('q-points').value,
   };
   await api('/api/admin/quests', 'POST', body);
   $('modal-quest').hidden = true;
@@ -264,6 +273,15 @@ function renderReport(r) {
     tbody.appendChild(tr);
   }
 }
+
+$('btn-confirm-nextset').onclick = async () => {
+  await api('/api/admin/nextSet', 'POST', { questIds: nextSet });
+  const btn = $('btn-confirm-nextset');
+  const orig = btn.textContent;
+  btn.textContent = '✅ Đã lưu';
+  setTimeout(() => { btn.textContent = orig; }, 1500);
+  loadAll();
+};
 
 $('btn-reset').onclick = async () => {
   if (!confirm('Xóa toàn bộ điểm, sổ điểm và vòng? Giữ nguyên người chơi và nhiệm vụ.')) return;

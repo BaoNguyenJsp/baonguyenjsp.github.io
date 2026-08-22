@@ -1,6 +1,7 @@
 const $ = id => document.getElementById(id);
 let state = null;
 let selected = new Set();
+const Q_COLOR = { Normal: 'q-green', Medium: 'q-yellow', Hard: 'q-red', Weekly: 'q-green', Special: 'q-yellow', Once: 'q-red' };
 
 // Spiral reveal: cell order = outside ring to inside, starting top-left going right.
 const coverRank = new Map(spiralOrder(10).map((i, k) => [i, k]));
@@ -28,7 +29,7 @@ function buildCover() {
 }
 buildCover();
 
-const BASE = 'https://script.google.com/macros/s/AKfycbwFTPEd83CQnuMwX-Scyt68xMZv5tPLSrYAi4hRO5raysh8nBCbPSakF9-GtD8-M5O7vQ/exec'; // Apps Script web app /exec URL (replace after deploy)
+const BASE = 'https://script.google.com/macros/s/AKfycbwauLUNRgCuCPYq-RyHwuGbLJ-JgeDGVF4o11iYj8-upL01IC-ihrF0vnBFVTPXD7OmBw/exec'; // Apps Script web app /exec URL (replace after deploy)
 async function api(url, method = 'GET', body) {
   const res = await fetch(BASE + '?p=' + encodeURIComponent(url.replace(/^\/api\//, '')), {
     method: 'POST',
@@ -58,7 +59,7 @@ function renderQuests(set, doneIds) {
   box.innerHTML = '';
   for (const q of set) {
     const b = document.createElement('button');
-    b.className = 'quest-btn q-' + q.color;
+    b.className = 'quest-btn ' + (Q_COLOR[q.type] || 'q-gray');
     const isDone = done.has(q.id);
     if (isDone) b.classList.add('done');
     b.innerHTML = `<span class="q-name">${isDone ? '✓ ' : ''}${q.name}</span>`;
@@ -106,13 +107,12 @@ function openPlayerModal(q) {
 }
 
 async function confirmQuest(q) {
-  if (!selected.size) return;
   $('modal-player').hidden = true;
   const before = state.giftTotal;
   state = await api('/api/quest/complete', 'POST', { questId: q.id, playerIds: [...selected] });
   const gained = state.giftTotal - before;
   render();
-  setTimeout(() => showPtsFloat(gained), 1000);
+  if (gained) setTimeout(() => showPtsFloat(gained), 1000);
   if (state.roundEnded) {
     $('celebrate-title').textContent = `🎉 Hoàn thành tuần ${state.round}! 🎉`;
     $('celebrate-msg').textContent = state.encouragement;

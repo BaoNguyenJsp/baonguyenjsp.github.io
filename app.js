@@ -28,7 +28,7 @@ function buildCover() {
 }
 buildCover();
 
-const BASE = 'https://script.google.com/macros/s/AKfycbxx1yOQiqlL5SrnfeDIHo56u5qcVjjQleuWLOLTG3fCGmyUzlaK3mJIDeL7M7oCmxBfRQ/exec'; // Apps Script web app /exec URL (replace after deploy)
+const BASE = 'https://script.google.com/macros/s/AKfycbwauLUNRgCuCPYq-RyHwuGbLJ-JgeDGVF4o11iYj8-upL01IC-ihrF0vnBFVTPXD7OmBw/exec'; // Apps Script web app /exec URL (replace after deploy)
 async function api(url, method = 'GET', body) {
   const res = await fetch(BASE + '?p=' + encodeURIComponent(url.replace(/^\/api\//, '')), {
     method: 'POST',

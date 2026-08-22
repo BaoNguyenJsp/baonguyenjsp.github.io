@@ -5,7 +5,7 @@ const TYPE_TAG = { Once: 'Super Special', Special: 'Special', Weekly: 'Weekly', 
 const TYPE_COLOR = { Once: 'q-red', Special: 'q-yellow', Weekly: 'q-green', Normal: 'q-gray' };
 const TYPE_POINTS = { Normal: 1, Weekly: 2, Special: 3, Once: 5 };
 
-const BASE = 'https://script.google.com/macros/s/AKfycbxx1yOQiqlL5SrnfeDIHo56u5qcVjjQleuWLOLTG3fCGmyUzlaK3mJIDeL7M7oCmxBfRQ/exec'; // Apps Script web app /exec URL (replace after deploy)
+const BASE = 'https://script.google.com/macros/s/AKfycbwauLUNRgCuCPYq-RyHwuGbLJ-JgeDGVF4o11iYj8-upL01IC-ihrF0vnBFVTPXD7OmBw/exec'; // Apps Script web app /exec URL (replace after deploy)
 let ADMIN_KEY = sessionStorage.getItem('adminKey');
 if (!ADMIN_KEY) { ADMIN_KEY = prompt('Nhập mã admin:') || ''; if (ADMIN_KEY) sessionStorage.setItem('adminKey', ADMIN_KEY); }
 function route(url, body = {}) {
