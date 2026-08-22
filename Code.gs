@@ -14,8 +14,8 @@
 
 const SPREADSHEET_ID = ''; // set only if the script is NOT bound to the spreadsheet
 const GIFT_MAX = 1000;
-const TYPE_COLOR = { Once: 'red', Special: 'yellow', Weekly: 'green', Normal: 'gray' };
-const TYPE_POINTS = { Normal: 1, Weekly: 3, Special: 5, Once: 10 };
+const TYPE_COLOR = { Normal: 'green', Medium: 'yellow', Hard: 'red' };
+const TYPE_POINTS = { Normal: 2, Medium: 5, Hard: 10 };
 const HEADERS = {
   players: ['id', 'name', 'points'],
   points: ['id', 'playerId', 'playerName', 'points', 'reason', 'date'],
@@ -84,10 +84,9 @@ function generateSet(week, quests, pinnedIds) {
   if (set.length >= 3) return set;
   const active = quests.filter(q => !set.includes(q));
   if (week % 3 === 0) {
-    const sp = randItem(shuffle(active.filter(q => q.type === 'Special')));
-    if (sp) { set.push(sp); active.splice(active.indexOf(sp), 1); }
+    const md = randItem(shuffle(active.filter(q => q.type === 'Medium')));
+    if (md) { set.push(md); active.splice(active.indexOf(md), 1); }
   }
-  for (const q of shuffle(active.filter(q => q.type === 'Weekly'))) { if (set.length >= 3) break; set.push(q); }
   for (const q of shuffle(active.filter(q => q.type === 'Normal'))) { if (set.length >= 3) break; set.push(q); }
   return set.slice(0, 3);
 }
@@ -226,15 +225,19 @@ function addPlayer(name) {
 function deletePlayer(id) {
   return withLock(() => writeTable('players', readTable('players').filter(p => String(p.id) !== String(id))));
 }
-function adjustPlayerPoints(id, delta, reason) {
+function adjustPlayerPoints(id, delta, reason) { return adjustPlayersPoints([id], delta, reason); }
+function adjustPlayersPoints(playerIds, delta, reason) {
   return withLock(() => {
     const players = readTable('players');
-    const p = players.find(p => String(p.id) === String(id));
-    if (!p) throw new Error('Không tìm thấy người chơi');
-    const d = Number(delta) || 0;
-    p.points = String(Math.max(0, (Number(p.points) || 0) + d));
     const points = readTable('points');
-    points.push({ id: nextId(points), playerId: p.id, playerName: p.name, points: String(d), reason: reason || 'Admin', date: todayStr() });
+    const d = Number(delta) || 0;
+    const ids = new Set((playerIds || []).map(String));
+    for (const p of players) {
+      if (ids.has(String(p.id))) {
+        p.points = String(Math.max(0, (Number(p.points) || 0) + d));
+        points.push({ id: nextId(points), playerId: p.id, playerName: p.name, points: String(d), reason: reason || 'Admin', date: todayStr() });
+      }
+    }
     writeTable('players', players);
     writeTable('points', points);
   });
@@ -245,18 +248,10 @@ function saveQuest(data) {
     const name = String(data.name || '').trim();
     if (!name) throw new Error('Tên nhiệm vụ không được để trống');
     const q = data.id ? quests.find(q => String(q.id) === String(data.id)) : null;
-    const body = { name, type: data.type, points: String(TYPE_POINTS[data.type] || 1) };
+    const body = { name, type: data.type, points: String(TYPE_POINTS[data.type] || 2) };
     if (q) Object.assign(q, body);
     else quests.push({ id: nextId(quests), ...body });
     writeTable('quests', quests);
-    // ponytail: a new Once quest is auto-scheduled for the next set; cap pinned list at 3.
-    if (!q && data.type === 'Once') {
-      const s = readState();
-      const pinned = s.nextSet ? s.nextSet.split(/[,;]/).filter(Boolean) : [];
-      if (!pinned.includes(String(quests[quests.length - 1].id))) pinned.unshift(String(quests[quests.length - 1].id));
-      s.nextSet = pinned.slice(0, 3).join(';');
-      writeState(s);
-    }
   });
 }
 function deleteQuest(id) {
@@ -291,6 +286,7 @@ function handle(p, body) {
       case 'admin/player': checkAdmin(body); addPlayer(body.name); return { ok: true };
       case 'admin/player/delete': checkAdmin(body); deletePlayer(body.id); return { ok: true };
       case 'admin/player/points': checkAdmin(body); adjustPlayerPoints(body.id, body.points, body.reason); return { ok: true };
+      case 'admin/points': checkAdmin(body); adjustPlayersPoints(body.playerIds, body.points, body.reason); return { ok: true };
       case 'admin/quest': checkAdmin(body); saveQuest(body); return { ok: true };
       case 'admin/quest/delete': checkAdmin(body); deleteQuest(body.id); return { ok: true };
       case 'admin/nextSet': checkAdmin(body); setNextSet(body.questIds); return { ok: true };
@@ -318,4 +314,19 @@ function setup() {
     if (!sheet) sheet = book.insertSheet(name);
     if (!sheet.getLastRow()) sheet.getRange(1, 1, 1, head.length).setValues([head]);
   }
+  migrateQuestTypes();
+}
+
+// Map old types (Weekly/Special/Once) onto the new Normal/Medium/Hard. Idempotent.
+function migrateQuestTypes() {
+  return withLock(() => {
+    const map = { Weekly: 'Normal', Special: 'Medium', Once: 'Hard' };
+    let changed = false;
+    const quests = readTable('quests').map(q => {
+      const type = map[q.type] || q.type;
+      if (type !== q.type || q.points !== String(TYPE_POINTS[type])) { q.type = type; q.points = String(TYPE_POINTS[type]); changed = true; }
+      return q;
+    });
+    if (changed) writeTable('quests', quests);
+  });
 }

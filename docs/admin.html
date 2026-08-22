@@ -4,18 +4,72 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quản lý — Món Quà Bí Ẩn</title>
-<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = { theme: { extend: { fontFamily: { sans: ['Be Vietnam Pro', 'sans-serif'] } } } };
+</script>
+<style type="text/tailwindcss">
+/* Component classes recreated with @apply so admin.js can stay untouched. */
+[hidden] { display: none !important; }
+@layer components {
+  .btn { @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-gradient-to-b from-sky-400 to-blue-600 px-4 py-2.5 font-bold text-white shadow-[0_4px_0_#1e40af] transition hover:brightness-110 active:translate-y-0.5 active:shadow-[0_2px_0_#1e40af]; }
+  .btn.small { @apply px-3 py-1.5 text-sm; }
+  .btn.danger { @apply bg-gradient-to-b from-red-400 to-red-600 shadow-[0_4px_0_#991b1b]; }
+  .btn.btn-plus { @apply h-10 w-10 rounded-full p-0; }
+  .actions { @apply flex items-center gap-2; }
+  .pts-pos { @apply font-bold text-green-600; }
+  .pts-neg { @apply font-bold text-red-600; }
+  .tag { @apply inline-block rounded-full px-3 py-0.5 text-sm font-semibold text-white; }
+  .tag.q-red { @apply bg-red-600; }
+  .tag.q-yellow { @apply bg-amber-600; }
+  .tag.q-green { @apply bg-green-600; }
+  .tag.q-gray { @apply bg-gray-500; }
+  .small { @apply text-sm; }
+  .chk-grid { @apply grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-1.5; }
+  .chk-grid .chk { @apply flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2 py-1 font-normal hover:bg-indigo-50; }
+  .modal { @apply fixed inset-0 z-[200] flex items-center justify-center bg-black/65; }
+  .modal-box { @apply w-[min(760px,92vw)] max-h-[88vh] overflow-auto rounded-2xl bg-white p-6 text-slate-900 shadow-2xl; }
+  .modal h2 { @apply mb-4 text-2xl font-bold text-slate-900; }
+  .modal-actions { @apply mt-4 flex items-center justify-between gap-3; }
+  .modal-actions .btn { @apply flex-1; }
+  .tabs { @apply flex gap-2 border-b-2 border-slate-300; }
+  .tabs .tab { @apply rounded-t-xl bg-slate-200 px-6 py-3 font-bold text-slate-700 hover:bg-blue-100; }
+  .tabs .tab.active { @apply bg-white text-violet-700 shadow-[inset_0_4px_0_#8b5cf6]; }
+  .card { @apply rounded-2xl border-t-4 border-violet-500 bg-white p-5 shadow-sm; }
+  .card-head { @apply mb-3 flex flex-wrap items-center justify-between gap-3; }
+  .card h2 { @apply text-2xl text-indigo-700; }
+  .table-wrap { @apply max-h-[480px] overflow-y-auto rounded-lg border border-slate-200; }
+  .table-wrap table { @apply mb-0; }
+  .field { @apply flex flex-col gap-1; }
+  .field label { @apply font-bold; }
+  .field input, .field select { @apply w-full; }
+  .stat-cards { @apply mb-4 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3.5; }
+  .stat-card { @apply rounded-2xl bg-gradient-to-b from-violet-600 to-purple-700 p-4 text-center text-white shadow-lg; }
+  .stat-card .num { @apply text-3xl font-black; }
+  .stat-card .lbl { @apply text-base opacity-95; }
+  .admin input, .admin select { @apply rounded-lg border-2 border-slate-300 px-3 py-2.5 text-base text-slate-900 focus:border-indigo-400 focus:outline-none; }
+  .admin table { @apply w-full text-slate-900; }
+  .admin th, .admin td { @apply border-b border-slate-200 p-3 text-left; }
+  .admin th { @apply bg-indigo-50 text-indigo-700; }
+  .admin th.center, .admin td.center { @apply text-center; }
+  /* last so it beats .admin input at equal specificity */
+  input.small { @apply w-24 py-1.5 text-sm; }
+}
+</style>
 </head>
-<body class="admin">
-  <header>
-    <h1>⚙️ Quản lý</h1>
-    <div class="header-btns">
+<body class="admin min-h-screen bg-gradient-to-b from-slate-100 to-blue-100 font-sans text-slate-900">
+  <header class="sticky top-0 z-40 flex flex-wrap items-center justify-between gap-2.5 bg-gradient-to-r from-indigo-950 to-indigo-700 px-6 py-4 text-white shadow-md">
+    <h1 class="text-2xl font-black">⚙️ Quản lý</h1>
+    <div class="flex gap-3">
       <a class="btn" href="index.html">🏠 Màn hình chính</a>
       <button id="btn-reset" class="btn danger">🔄 Đặt lại</button>
     </div>
   </header>
 
-  <main>
+  <main class="mx-auto flex max-w-[1100px] flex-col gap-5 px-4 py-6">
     <nav class="tabs">
       <button class="tab active" data-tab="tab-quests">📋 Nhiệm vụ</button>
       <button class="tab" data-tab="tab-players">👥 Người chơi</button>
@@ -27,10 +81,19 @@
       <div class="card">
         <div class="card-head">
           <h2>Nhiệm vụ</h2>
-          <button id="btn-new-quest" class="btn">➕ Mới</button>
+          <div class="actions">
+            <input id="quest-search" placeholder="🔍 Tìm nhiệm vụ..." style="width: 200px;">
+            <select id="quest-type-filter">
+              <option value="">Tất cả loại</option>
+              <option value="Normal">Normal</option>
+              <option value="Medium">Medium</option>
+              <option value="Hard">Hard</option>
+            </select>
+            <button id="btn-new-quest" class="btn">➕ Mới</button>
+          </div>
         </div>
-        <p class="small" style="margin-bottom:4px">Chọn (✓) lên đến 3 nhiệm vụ cho vòng tới.</p>
-        <p class="small" style="margin-bottom:10px">Điểm tự động theo loại: <b>Normal = 1</b>, <b>Weekly = 2</b>, <b>Special = 3</b>, <b>Super Special = 5</b>.</p>
+        <p class="mb-1 text-sm">Chọn (✓) lên đến 3 nhiệm vụ cho vòng tới. Hard chỉ xuất hiện khi chọn tay.</p>
+        <p class="mb-2.5 text-sm">Điểm tự động theo loại: <b>Normal = 2</b>, <b>Medium = 5</b>, <b>Hard = 10</b>.</p>
         <div class="table-wrap">
           <table>
             <thead><tr><th class="center">Chọn</th><th>Tên</th><th>Loại</th><th>Điểm</th><th>Hành động</th></tr></thead>
@@ -44,7 +107,11 @@
       <div class="card">
         <div class="card-head">
           <h2>Người chơi</h2>
-          <button id="btn-new-player" class="btn">➕ Mới</button>
+          <div class="actions">
+            <input id="player-search" placeholder="🔍 Tìm người chơi..." style="width: 200px;">
+            <button id="btn-bonus" class="btn">🎁 Thưởng điểm</button>
+            <button id="btn-new-player" class="btn">➕ Mới</button>
+          </div>
         </div>
         <div class="table-wrap">
           <table>
@@ -57,7 +124,12 @@
 
     <section id="tab-points" hidden>
       <div class="card">
-        <div class="card-head"><h2>Sổ điểm</h2></div>
+        <div class="card-head">
+          <h2>Sổ điểm</h2>
+          <div class="actions">
+            <input id="ledger-search" placeholder="🔍 Tìm theo tên / lý do..." style="width: 240px;">
+          </div>
+        </div>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Ngày</th><th>Người chơi</th><th>Điểm</th><th>Lý do</th></tr></thead>
@@ -69,7 +141,12 @@
 
     <section id="tab-report" hidden>
       <div class="card">
-        <div class="card-head"><h2>Báo cáo hoạt động</h2></div>
+        <div class="card-head">
+          <h2>Báo cáo hoạt động</h2>
+          <div class="actions">
+            <input id="report-search" placeholder="🔍 Tìm người chơi..." style="width: 200px;">
+          </div>
+        </div>
         <div class="stat-cards" id="report-stats"></div>
         <div class="table-wrap">
           <table>
@@ -93,11 +170,11 @@
           <label for="q-type">Loại</label>
           <select id="q-type" style="min-width: 380px;">
             <option value="Normal">Normal</option>
-            <option value="Weekly">Weekly</option>
-            <option value="Special">Special</option>
-            <option value="Once">Super Special</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
           </select>
-          <p class="small" style="margin-top:4px">Điểm tự động: <b id="q-points-hint">1</b></p>
+          <p class="mt-1 text-sm">Điểm tự động: <b id="q-points-hint">2</b></p>
+          <p class="mt-1 text-sm">Medium: mỗi 3 tuần xuất hiện 1 lần · Hard: chỉ chọn tay.</p>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn" data-close>Hủy</button>
@@ -118,6 +195,34 @@
         <div class="modal-actions">
           <button type="button" class="btn" data-close>Hủy</button>
           <button class="btn" type="submit">Thêm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modal-bonus" class="modal" hidden>
+    <div class="modal-box">
+      <h2>🎁 Thưởng điểm</h2>
+      <form id="bonus-form">
+        <div class="field">
+          <label for="b-points">Điểm (+/−)</label>
+          <input id="b-points" type="number" required style="min-width: 380px;">
+        </div>
+        <div class="field">
+          <label for="b-reason">Lý do</label>
+          <input id="b-reason" placeholder="Nhập lý do..." style="min-width: 380px;">
+        </div>
+        <div class="field">
+          <label>Người chơi</label>
+          <div class="actions" style="margin-bottom: 6px;">
+            <button type="button" class="btn small" id="b-all">✅ Chọn tất cả (cả lớp)</button>
+            <button type="button" class="btn small" id="b-none">Bỏ chọn</button>
+          </div>
+          <div id="b-players" class="chk-grid"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" data-close>Hủy</button>
+          <button class="btn" type="submit">Cộng điểm</button>
         </div>
       </form>
     </div>

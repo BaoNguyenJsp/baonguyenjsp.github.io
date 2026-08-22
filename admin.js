@@ -1,8 +1,9 @@
 const $ = id => document.getElementById(id);
 let nextSet = [];
 
-const TYPE_COLOR = { Normal: 'q-green', Medium: 'q-yellow', Hard: 'q-red' };
-const TYPE_POINTS = { Normal: 2, Medium: 5, Hard: 10 };
+const TYPE_TAG = { Once: 'Super Special', Special: 'Special', Weekly: 'Weekly', Normal: 'Normal' };
+const TYPE_COLOR = { Once: 'q-red', Special: 'q-yellow', Weekly: 'q-green', Normal: 'q-gray' };
+const TYPE_POINTS = { Normal: 1, Weekly: 2, Special: 3, Once: 5 };
 
 const BASE = 'https://script.google.com/macros/s/AKfycbxx1yOQiqlL5SrnfeDIHo56u5qcVjjQleuWLOLTG3fCGmyUzlaK3mJIDeL7M7oCmxBfRQ/exec'; // Apps Script web app /exec URL (replace after deploy)
 let ADMIN_KEY = sessionStorage.getItem('adminKey');
@@ -17,19 +18,13 @@ function route(url, body = {}) {
 }
 async function api(url, method = 'GET', body) {
   const r = route(url, body);
-  let res;
-  try {
-    res = await fetch(BASE + '?p=' + encodeURIComponent(r.p), {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
-      body: JSON.stringify(r.p.startsWith('admin/') ? { ...r.body, key: ADMIN_KEY } : r.body),
-    });
-  } catch (e) {
-    alert('Lỗi mạng: ' + e.message);
-    throw e;
-  }
+  const res = await fetch(BASE + '?p=' + encodeURIComponent(r.p), {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify(r.p.startsWith('admin/') ? { ...r.body, key: ADMIN_KEY } : r.body),
+  });
   const data = await res.json();
-  if (data && data.error) { alert('Lỗi: ' + data.error); throw new Error(data.error); }
+  if (data && data.error) throw new Error(data.error);
   return data;
 }
 
@@ -44,40 +39,15 @@ tabs.forEach(t => t.onclick = () => {
 
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => { b.closest('.modal').hidden = true; });
 
-// ---- Search & filter (client-side row hiding) ----
-const SEARCH = [
-  ['quest-tbody', 'quest-search'],
-  ['player-tbody', 'player-search'],
-  ['ledger-tbody', 'ledger-search'],
-  ['report-tbody', 'report-search'],
-];
-function applyFilters() {
-  const typeFilter = $('quest-type-filter').value;
-  for (const [tbodyId, inputId] of SEARCH) {
-    const tbody = $(tbodyId);
-    const q = ($(inputId).value || '').trim().toLowerCase();
-    for (const tr of tbody.children) {
-      let show = !q || tr.textContent.toLowerCase().includes(q);
-      if (show && tbodyId === 'quest-tbody' && typeFilter && tr.dataset.type !== typeFilter) show = false;
-      tr.hidden = !show;
-    }
-  }
-}
-SEARCH.forEach(([, inputId]) => $(inputId).oninput = applyFilters);
-$('quest-type-filter').onchange = applyFilters;
-
-let allPlayers = [];
 async function loadAll() {
   const [state, quests, players, points, report] = await Promise.all([
     api('/api/state'), api('/api/quests'), api('/api/players'), api('/api/points'), api('/api/report'),
   ]);
   nextSet = state.nextSet;
-  allPlayers = players.players;
   renderQuests(quests.quests);
   renderPlayers(players.players);
   renderLedger(points.points);
   renderReport(report.report);
-  applyFilters();
 }
 
 // ---- Quests ----
@@ -86,7 +56,6 @@ function renderQuests(quests) {
   tbody.innerHTML = '';
   for (const q of quests) {
     const tr = document.createElement('tr');
-    tr.dataset.type = q.type;
     const tdChk = document.createElement('td');
     tdChk.className = 'center';
     const cb = document.createElement('input');
@@ -113,7 +82,7 @@ function renderQuests(quests) {
     tdAct.appendChild(wrap);
     tr.append(tdChk);
     tr.insertAdjacentHTML('beforeend',
-      `<td>${q.name}</td><td><span class="tag ${TYPE_COLOR[q.type]}">${q.type}</span></td>` +
+      `<td>${q.name}</td><td><span class="tag ${TYPE_COLOR[q.type]}">${TYPE_TAG[q.type]}</span></td>` +
       `<td><b>${q.points}</b></td>`);
     tr.appendChild(tdAct);
     tbody.appendChild(tr);
@@ -197,35 +166,6 @@ $('player-form').onsubmit = async e => {
 };
 
 $('btn-new-player').onclick = () => { $('p-name').value = ''; $('modal-player').hidden = false; $('p-name').focus(); };
-
-// ---- Bulk bonus points (whole class or selected) ----
-function renderBonusPlayers() {
-  const box = $('b-players');
-  box.innerHTML = '';
-  for (const p of allPlayers) {
-    const label = document.createElement('label');
-    label.className = 'chk';
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.value = p.id;
-    label.append(cb, document.createTextNode(' ' + p.name + ' (' + p.points + ')'));
-    box.appendChild(label);
-  }
-}
-const boxChecks = () => $('b-players').querySelectorAll('input');
-$('b-all').onclick = () => boxChecks().forEach(c => c.checked = true);
-$('b-none').onclick = () => boxChecks().forEach(c => c.checked = false);
-$('btn-bonus').onclick = () => { $('b-points').value = ''; $('b-reason').value = ''; renderBonusPlayers(); $('modal-bonus').hidden = false; };
-$('bonus-form').onsubmit = async e => {
-  e.preventDefault();
-  const v = Number($('b-points').value);
-  if (!v) return;
-  const playerIds = [...boxChecks()].filter(c => c.checked).map(c => c.value);
-  if (!playerIds.length) { alert('Chưa chọn người chơi nào'); return; }
-  await api('/api/admin/points', 'POST', { playerIds, points: v, reason: $('b-reason').value.trim() || 'Admin: Thưởng điểm' });
-  $('modal-bonus').hidden = true;
-  loadAll();
-};
 
 // ---- Ledger ----
 function renderLedger(points) {
