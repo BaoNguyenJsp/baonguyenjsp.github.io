@@ -71,7 +71,7 @@ function renderQuests(set, doneIds) {
 let currentQ = null;
 // Two-half player grid: right half (cols 4-6) = players 1..PLAYER_SPLIT-1 left-to-right,
 // left half (cols 1-3) = players PLAYER_SPLIT..end right-to-left.
-const PLAYER_SPLIT = 12;
+const PLAYER_SPLIT = 13;
 function openPlayerModal(q) {
   currentQ = q;
   selected.clear();
