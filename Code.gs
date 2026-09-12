@@ -15,7 +15,7 @@
 const SPREADSHEET_ID = ''; // set only if the script is NOT bound to the spreadsheet
 const GIFT_MAX = 1000;
 const TYPE_COLOR = { Normal: 'green', Medium: 'yellow', Hard: 'red' };
-const TYPE_POINTS = { Normal: 2, Medium: 5, Hard: 10 };
+const TYPE_POINTS = { Normal: 2, Medium: 3, Hard: 5 };
 const HEADERS = {
   players: ['id', 'name', 'points'],
   points: ['id', 'playerId', 'playerName', 'points', 'reason', 'date'],

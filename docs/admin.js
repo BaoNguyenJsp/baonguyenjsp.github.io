@@ -2,7 +2,7 @@ const $ = id => document.getElementById(id);
 let nextSet = [];
 
 const TYPE_COLOR = { Normal: 'q-green', Medium: 'q-yellow', Hard: 'q-red' };
-const TYPE_POINTS = { Normal: 2, Medium: 5, Hard: 10 };
+const TYPE_POINTS = { Normal: 2, Medium: 3, Hard: 5 };
 
 const BASE = 'https://script.google.com/macros/s/AKfycbwauLUNRgCuCPYq-RyHwuGbLJ-JgeDGVF4o11iYj8-upL01IC-ihrF0vnBFVTPXD7OmBw/exec'; // Apps Script web app /exec URL (replace after deploy)
 let ADMIN_KEY = sessionStorage.getItem('adminKey');
