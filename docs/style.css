@@ -117,6 +117,35 @@
   transform: scale(1.03);
 }
 
+/* Shared styling for both player modal and bonus modal grids */
+#player-grid .cell,
+#b-players .cell {
+  background: #f1f5f9;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 12px 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #1e293b;
+  word-break: break-word;
+  text-align: center;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+#player-grid .cell:hover,
+#b-players .cell:hover {
+  background: #e2e8f0;
+}
+
+#player-grid .cell.selected,
+#b-players .cell.selected {
+  background: #16a34a;
+  border-color: #15803d;
+  color: #ffffff;
+}
+
 /* "+ N điểm" float after completing a quest */
 #pts-float {
   position: fixed;

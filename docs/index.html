@@ -22,9 +22,17 @@
     class="flex flex-wrap items-center justify-between gap-2.5 bg-gradient-to-r from-violet-700 to-pink-600 px-6 py-5 shadow-[0_4px_14px_rgba(0,0,0,.35)]">
     <h1 class="text-3xl font-black">🎁 Món Quà Bí Ẩn</h1>
     <div class="flex gap-3">
+      <!-- 🏆 Xếp hạng Button -->
       <button id="btn-ranking"
         class="rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 px-6 py-3.5 font-bold shadow-[0_4px_0_#1e40af] transition hover:brightness-110 active:translate-y-0.5 active:shadow-[0_2px_0_#1e40af]">🏆
         Xếp hạng</button>
+      
+      <!-- 🎁 Thưởng điểm Button (Right beside Xếp hạng) -->
+      <button id="btn-bonus"
+        class="rounded-2xl bg-gradient-to-b from-amber-400 to-orange-500 px-6 py-3.5 font-bold shadow-[0_4px_0_#c2410c] transition hover:brightness-110 active:translate-y-0.5 active:shadow-[0_2px_0_#c2410c]">🎁
+        Thưởng điểm</button>
+
+      <!-- ⚙️ Quản lý Link -->
       <a class="rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 px-6 py-3.5 font-bold shadow-[0_4px_0_#1e40af] transition hover:brightness-110 active:translate-y-0.5 active:shadow-[0_2px_0_#1e40af]"
         href="admin.html">⚙️ Quản lý</a>
     </div>
@@ -53,30 +61,53 @@
 
   <div id="pts-float"></div>
 
+  <!-- Player Modal (Nhiệm vụ) -->
   <div id="modal-player" class="modal fixed inset-0 z-[200] flex items-center justify-center bg-black/65" hidden>
-    <div
-      class="modal-box relative max-h-[88vh] overflow-visible rounded-2xl bg-white p-6 pt-12 text-slate-800 shadow-2xl">
-
-      <!-- Top Edge Banner Board -->
-      <div
-        class="absolute -top-5 left-1/2 -translate-x-1/2 rounded-xl bg-amber-800 px-8 py-2 text-center shadow-lg border-2 border-amber-600">
+    <div class="modal-box relative w-[min(760px,92vw)] max-h-[88vh] overflow-visible rounded-2xl bg-white p-6 pt-12 text-slate-800 shadow-2xl">
+      <div class="absolute -top-5 left-1/2 -translate-x-1/2 rounded-xl bg-amber-800 px-8 py-2 text-center shadow-lg border-2 border-amber-600">
         <span class="text-xl font-black tracking-wide text-amber-100 uppercase">Bảng</span>
       </div>
-
-      <!-- Top Right Door Sign -->
-      <div
-        class="absolute top-4 right-4 flex items-center gap-1.5 rounded-lg border-2 border-amber-700 bg-amber-100 px-3 py-1 shadow-sm text-amber-900 font-bold text-sm">
-        <span>🚪 Cửa</span>
+      <div id="btn-close-player" class="absolute top-4 right-4 flex items-center gap-1.5 rounded-lg border-2 border-amber-700 bg-amber-100 px-3 py-1 shadow-sm text-amber-900 font-bold text-sm">
+        <span>🚪</span>
+        <span>Cửa</span>
       </div>
-
       <h2 class="mb-4 text-2xl font-bold text-slate-900">Ai hoàn thành nhiệm vụ?</h2>
       <div id="player-grid" class="mb-4 grid grid-cols-8 gap-2.5"></div>
       <div class="flex items-center justify-between gap-3">
         <span id="sel-count" class="text-xl font-bold text-slate-700">Đã chọn: 0</span>
         <button id="btn-confirm"
-          class="rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 px-6 py-3.5 font-bold text-white shadow-[0_4px_0_#1e40af] transition hover:brightness-110 active:translate-y-0.5 active:shadow-[0_2px_0_#1e40af]">Xác
-          nhận</button>
+          class="rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 px-6 py-3.5 font-bold text-white shadow-[0_4px_0_#1e40af] transition hover:brightness-110 active:translate-y-0.5 active:shadow-[0_2px_0_#1e40af]">Xác nhận</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Bonus Points Modal (Thưởng điểm) -->
+  <div id="modal-bonus" class="modal fixed inset-0 z-[200] flex items-center justify-center bg-black/65" hidden>
+    <div class="modal-box w-[min(820px,94vw)] max-h-[88vh] overflow-auto rounded-2xl bg-white p-6 text-slate-900 shadow-2xl">
+      <button id="btn-close-bonus-x" class="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-800 font-bold transition">✕</button>
+      <h2 class="mb-4 text-2xl font-bold text-slate-900">🎁 Thưởng điểm</h2>
+      <form id="bonus-form">
+        <div class="mb-3 flex flex-col gap-1">
+          <label for="b-points" class="font-bold">Điểm (+/−)</label>
+          <input id="b-points" type="number" required class="w-full rounded-lg border-2 border-slate-300 px-3 py-2 text-base text-slate-900 focus:border-indigo-400 focus:outline-none">
+        </div>
+        <div class="mb-3 flex flex-col gap-1">
+          <label for="b-reason" class="font-bold">Lý do</label>
+          <input id="b-reason" placeholder="Nhập lý do..." class="w-full rounded-lg border-2 border-slate-300 px-3 py-2 text-base text-slate-900 focus:border-indigo-400 focus:outline-none">
+        </div>
+        <div class="mb-3 flex flex-col gap-1">
+          <label class="font-bold">Người chơi</label>
+          <div class="mb-2 flex gap-2">
+            <button type="button" class="rounded-xl bg-gradient-to-b from-sky-400 to-blue-600 px-3 py-1.5 text-sm font-bold text-white shadow-[0_2px_0_#1e40af]" id="b-all">✅ Chọn tất cả (cả lớp)</button>
+            <button type="button" class="rounded-xl bg-gradient-to-b from-sky-400 to-blue-600 px-3 py-1.5 text-sm font-bold text-white shadow-[0_2px_0_#1e40af]" id="b-none">Bỏ chọn</button>
+          </div>
+          <div id="b-players" class="grid grid-cols-8 gap-2 max-h-[45vh] overflow-y-auto p-1"></div>
+        </div>
+        <div class="mt-4 flex items-center justify-between gap-3">
+          <button type="button" id="btn-close-bonus" class="flex-1 rounded-2xl bg-slate-300 px-6 py-3.5 font-bold text-slate-700 hover:bg-slate-400">Hủy</button>
+          <button type="submit" class="flex-1 rounded-2xl bg-gradient-to-b from-sky-400 to-blue-600 px-6 py-3.5 font-bold text-white shadow-[0_4px_0_#1e40af] transition hover:brightness-110 active:translate-y-0.5 active:shadow-[0_2px_0_#1e40af]">Cộng điểm</button>
+        </div>
+      </form>
     </div>
   </div>
 

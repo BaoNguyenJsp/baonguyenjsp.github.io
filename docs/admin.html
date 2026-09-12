@@ -28,8 +28,6 @@ tailwind.config = { theme: { extend: { fontFamily: { sans: ['Be Vietnam Pro', 's
   .tag.q-green { @apply bg-green-600; }
   .tag.q-gray { @apply bg-gray-500; }
   .small { @apply text-sm; }
-  .chk-grid { @apply grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-1.5; }
-  .chk-grid .chk { @apply flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2 py-1 font-normal hover:bg-indigo-50; }
   .modal { @apply fixed inset-0 z-[200] flex items-center justify-center bg-black/65; }
   .modal-box { @apply w-[min(760px,92vw)] max-h-[88vh] overflow-auto rounded-2xl bg-white p-6 text-slate-900 shadow-2xl; }
   .modal h2 { @apply mb-4 text-2xl font-bold text-slate-900; }
@@ -55,9 +53,26 @@ tailwind.config = { theme: { extend: { fontFamily: { sans: ['Be Vietnam Pro', 's
   .admin th, .admin td { @apply border-b border-slate-200 p-3 text-left; }
   .admin th { @apply bg-indigo-50 text-indigo-700; }
   .admin th.center, .admin td.center { @apply text-center; }
-  /* last so it beats .admin input at equal specificity */
   input.small { @apply w-24 py-1.5 text-sm; }
 }
+
+/* Bonus Modal Player Grid Custom Styles */
+#b-players .cell { 
+  background: #f1f5f9; 
+  border: 2px solid #cbd5e1; 
+  border-radius: 10px; 
+  padding: 10px 4px; 
+  font-size: 0.95rem; 
+  font-weight: 600;
+  cursor: pointer; 
+  color: #1e293b; 
+  word-break: break-word; 
+  text-align: center;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+#b-players .cell:hover { background: #e2e8f0; }
+#b-players .cell.selected { background: #16a34a; border-color: #15803d; color: #ffffff; }
 </style>
 </head>
 <body class="admin min-h-screen bg-gradient-to-b from-slate-100 to-blue-100 font-sans text-slate-900">
@@ -119,7 +134,7 @@ tailwind.config = { theme: { extend: { fontFamily: { sans: ['Be Vietnam Pro', 's
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Tên</th><th>Điểm</th><th>Điều chỉnh</th><th>Hành động</th></tr></thead>
+            <thead><tr><th>Tên</th><th>Giới tính</th><th>Điểm</th><th>Điều chỉnh</th><th>Hành động</th></tr></thead>
             <tbody id="player-tbody"></tbody>
           </table>
         </div>
@@ -196,9 +211,16 @@ tailwind.config = { theme: { extend: { fontFamily: { sans: ['Be Vietnam Pro', 's
     <div class="modal-box">
       <h2>➕ Thêm người chơi</h2>
       <form id="player-form">
-        <div class="field">
+        <div class="field mb-3">
           <label for="p-name">Tên người chơi</label>
           <input id="p-name" required style="min-width: 380px;">
+        </div>
+        <div class="field mb-3">
+          <label for="p-gender">Giới tính</label>
+          <select id="p-gender" style="min-width: 380px;">
+            <option value="M">Nam (M)</option>
+            <option value="F">Nữ (F)</option>
+          </select>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn" data-close>Hủy</button>
@@ -209,24 +231,25 @@ tailwind.config = { theme: { extend: { fontFamily: { sans: ['Be Vietnam Pro', 's
   </div>
 
   <div id="modal-bonus" class="modal" hidden>
-    <div class="modal-box">
+    <div class="modal-box w-[min(820px,94vw)]">
       <h2>🎁 Thưởng điểm</h2>
       <form id="bonus-form">
-        <div class="field">
+        <div class="field mb-3">
           <label for="b-points">Điểm (+/−)</label>
-          <input id="b-points" type="number" required style="min-width: 380px;">
+          <input id="b-points" type="number" required style="width: 100%;">
         </div>
-        <div class="field">
+        <div class="field mb-3">
           <label for="b-reason">Lý do</label>
-          <input id="b-reason" placeholder="Nhập lý do..." style="min-width: 380px;">
+          <input id="b-reason" placeholder="Nhập lý do..." style="width: 100%;">
         </div>
-        <div class="field">
+        <div class="field mb-3">
           <label>Người chơi</label>
-          <div class="actions" style="margin-bottom: 6px;">
+          <div class="actions" style="margin-bottom: 8px;">
             <button type="button" class="btn small" id="b-all">✅ Chọn tất cả (cả lớp)</button>
             <button type="button" class="btn small" id="b-none">Bỏ chọn</button>
           </div>
-          <div id="b-players" class="chk-grid"></div>
+          <!-- 8-column player grid (Males Left / Females Right) -->
+          <div id="b-players" class="grid grid-cols-8 gap-2 max-h-[50vh] overflow-y-auto p-1"></div>
         </div>
         <div class="modal-actions">
           <button type="button" class="btn" data-close>Hủy</button>

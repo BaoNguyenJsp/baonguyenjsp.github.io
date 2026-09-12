@@ -163,7 +163,7 @@ function renderPlayers(players) {
   tbody.innerHTML = '';
   for (const p of players) {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${p.name}</td><td><b>${p.points}</b></td>`;
+    tr.innerHTML = `<td>${p.name}</td><td>${p.gender || 'M'}</td><td><b>${p.points}</b></td>`;
     const input = document.createElement('input');
     input.type = 'number';
     input.placeholder = '+/-';
@@ -200,36 +200,96 @@ function renderPlayers(players) {
 
 $('player-form').onsubmit = async e => {
   e.preventDefault();
-  await api('/api/admin/players', 'POST', { name: $('p-name').value.trim() });
+  await api('/api/admin/players', 'POST', { 
+    name: $('p-name').value.trim(),
+    gender: $('p-gender').value
+  });
   $('modal-player').hidden = true;
   loadAll();
 };
 
-$('btn-new-player').onclick = () => { $('p-name').value = ''; $('modal-player').hidden = false; $('p-name').focus(); };
+$('btn-new-player').onclick = () => { 
+  $('p-name').value = ''; 
+  $('p-gender').value = 'M';
+  $('modal-player').hidden = false; 
+  $('p-name').focus(); 
+};
 
-// ---- Bulk bonus points (whole class or selected) ----
+// ---- Bulk bonus points (8-column center-out grid) ----
+let bonusSelected = new Set();
+
 function renderBonusPlayers() {
   const box = $('b-players');
   box.innerHTML = '';
-  for (const p of allPlayers) {
-    const label = document.createElement('label');
-    label.className = 'chk';
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.value = p.id;
-    label.append(cb, document.createTextNode(' ' + p.name + ' (' + p.points + ')'));
-    box.appendChild(label);
+
+  const males = allPlayers.filter(p => (p.gender || 'M').toUpperCase() === 'M');
+  const females = allPlayers.filter(p => (p.gender || 'F').toUpperCase() === 'F');
+
+  const rows = Math.max(Math.ceil(males.length / 4), Math.ceil(females.length / 4));
+
+  const cell = p => {
+    const el = document.createElement('div');
+    el.className = 'cell';
+    if (!p) { el.style.visibility = 'hidden'; return el; }
+
+    el.textContent = `${p.name} (${p.points || 0})`;
+    el.dataset.id = String(p.id);
+
+    if (bonusSelected.has(String(p.id))) {
+      el.classList.add('selected');
+    }
+
+    el.onclick = () => {
+      const id = String(p.id);
+      if (bonusSelected.has(id)) {
+        bonusSelected.delete(id);
+        el.classList.remove('selected');
+      } else {
+        bonusSelected.add(id);
+        el.classList.add('selected');
+      }
+    };
+    return el;
+  };
+
+  for (let r = 0; r < rows; r++) {
+    // Left side (Males / M): Middle out (Col 4 -> Col 3 -> Col 2 -> Col 1)
+    box.appendChild(cell(males[4 * r + 3])); // Col 1
+    box.appendChild(cell(males[4 * r + 2])); // Col 2
+    box.appendChild(cell(males[4 * r + 1])); // Col 3
+    box.appendChild(cell(males[4 * r]));     // Col 4 (inner left)
+
+    // Right side (Females / F): Middle out (Col 5 -> Col 6 -> Col 7 -> Col 8)
+    box.appendChild(cell(females[4 * r]));     // Col 5 (inner right)
+    box.appendChild(cell(females[4 * r + 1])); // Col 6
+    box.appendChild(cell(females[4 * r + 2])); // Col 7
+    box.appendChild(cell(females[4 * r + 3])); // Col 8
   }
 }
-const boxChecks = () => $('b-players').querySelectorAll('input');
-$('b-all').onclick = () => boxChecks().forEach(c => c.checked = true);
-$('b-none').onclick = () => boxChecks().forEach(c => c.checked = false);
-$('btn-bonus').onclick = () => { $('b-points').value = ''; $('b-reason').value = ''; renderBonusPlayers(); $('modal-bonus').hidden = false; };
+
+$('b-all').onclick = () => {
+  allPlayers.forEach(p => bonusSelected.add(String(p.id)));
+  renderBonusPlayers();
+};
+
+$('b-none').onclick = () => {
+  bonusSelected.clear();
+  renderBonusPlayers();
+};
+
+$('btn-bonus').onclick = () => { 
+  $('b-points').value = ''; 
+  $('b-reason').value = ''; 
+  bonusSelected.clear();
+  renderBonusPlayers(); 
+  $('modal-bonus').hidden = false; 
+};
+
 $('bonus-form').onsubmit = async e => {
   e.preventDefault();
   const v = Number($('b-points').value);
   if (!v) return;
-  const playerIds = [...boxChecks()].filter(c => c.checked).map(c => c.value);
+  const playerIds = [...bonusSelected];
   if (!playerIds.length) { alert('Chưa chọn người chơi nào'); return; }
   await api('/api/admin/points', 'POST', { playerIds, points: v, reason: $('b-reason').value.trim() || 'Admin: Thưởng điểm' });
   $('modal-bonus').hidden = true;
