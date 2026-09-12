@@ -29,7 +29,7 @@ function buildCover() {
 }
 buildCover();
 
-const BASE = 'https://script.google.com/macros/s/AKfycbwauLUNRgCuCPYq-RyHwuGbLJ-JgeDGVF4o11iYj8-upL01IC-ihrF0vnBFVTPXD7OmBw/exec'; // Apps Script web app /exec URL (replace after deploy)
+const BASE = 'https://script.google.com/macros/s/AKfycby0ZpKNXKvBu0_L1Xk9zT0j0o6S36MBFawDQxdaDd_e9wLJ6flRMWdDUF8Jq0hVUoTSgA/exec'; // Apps Script web app /exec URL (replace after deploy)
 async function api(url, method = 'GET', body) {
   const res = await fetch(BASE + '?p=' + encodeURIComponent(url.replace(/^\/api\//, '')), {
     method: 'POST',
@@ -71,37 +71,118 @@ function renderQuests(set, doneIds) {
 let currentQ = null;
 // Two-half player grid: right half (cols 4-6) = players 1..PLAYER_SPLIT-1 left-to-right,
 // left half (cols 1-3) = players PLAYER_SPLIT..end right-to-left.
-const PLAYER_SPLIT = 13;
+let draggedIndex = null;
+let draggedGender = null;
+
 function openPlayerModal(q) {
   currentQ = q;
   selected.clear();
   const grid = $('player-grid');
   grid.innerHTML = '';
-  const right = state.players.slice(0, PLAYER_SPLIT - 1);
-  const left = state.players.slice(PLAYER_SPLIT - 1);
-  const rows = Math.max(Math.ceil(left.length / 3), Math.ceil(right.length / 3));
-  const cell = p => {
+
+  // Separate players by gender
+  const males = state.players.filter(p => (p.gender || 'M').toUpperCase() === 'M');
+  const females = state.players.filter(p => (p.gender || 'F').toUpperCase() === 'F');
+
+  const rows = Math.max(Math.ceil(males.length / 4), Math.ceil(females.length / 4));
+
+  // Helper cell generator with Drag & Drop listeners
+  const cell = (p, list, index) => {
     const el = document.createElement('div');
     el.className = 'cell';
-    if (!p) { el.style.visibility = 'hidden'; return el; }
+    
+    if (!p) { 
+      el.style.visibility = 'hidden'; 
+      return el; 
+    }
+
     el.textContent = p.name;
     el.dataset.id = p.id;
+    el.draggable = true;
+
+    // Toggle Selection
     el.onclick = () => {
       const id = el.dataset.id;
-      if (selected.has(id)) { selected.delete(id); el.classList.remove('selected'); }
-      else { selected.add(id); el.classList.add('selected'); }
+      if (selected.has(id)) { 
+        selected.delete(id); 
+        el.classList.remove('selected'); 
+      } else { 
+        selected.add(id); 
+        el.classList.add('selected'); 
+      }
       $('sel-count').textContent = 'Đã chọn: ' + selected.size;
     };
+
+    // --- Drag and Drop Events ---
+    el.addEventListener('dragstart', (e) => {
+      draggedIndex = index;
+      draggedGender = p.gender;
+      el.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+
+    el.addEventListener('dragend', () => {
+      el.classList.remove('dragging');
+    });
+
+    el.addEventListener('dragover', (e) => {
+      // Only allow dropping within the same gender side
+      if (draggedGender === p.gender) {
+        e.preventDefault();
+        el.classList.add('drag-over');
+      }
+    });
+
+    el.addEventListener('dragleave', () => {
+      el.classList.remove('drag-over');
+    });
+
+    el.addEventListener('drop', (e) => {
+      e.preventDefault();
+      el.classList.remove('drag-over');
+
+      if (draggedIndex === null || draggedIndex === index || draggedGender !== p.gender) return;
+
+      // Swap players inside the gender array
+      const targetList = p.gender === 'M' ? males : females;
+      const temp = targetList[draggedIndex];
+      targetList[draggedIndex] = targetList[index];
+      targetList[index] = temp;
+
+      // Update global state players array to preserve new order
+      state.players = [...females, ...males];
+      renderModalGrid(males, females, rows);
+
+      // Send the new ordered ID list to Apps Script without changing any ID values
+      api('/api/admin/player/reorder', 'POST', {
+        playerIds: state.players.map(p => p.id)
+      });
+
+      // Re-render modal grid with new order
+      renderModalGrid(males, females, rows);
+    });
+
     return el;
   };
-  for (let r = 0; r < rows; r++) {
-    grid.appendChild(cell(left[3 * r + 2]));   // col 1
-    grid.appendChild(cell(left[3 * r + 1]));   // col 2
-    grid.appendChild(cell(left[3 * r]));       // col 3
-    grid.appendChild(cell(right[3 * r]));      // col 4
-    grid.appendChild(cell(right[3 * r + 1]));  // col 5
-    grid.appendChild(cell(right[3 * r + 2]));  // col 6
+
+  function renderModalGrid(mList, fList, totalRows) {
+    grid.innerHTML = '';
+    for (let r = 0; r < totalRows; r++) {
+      // Left side (Males): Center out (Col 4 -> Col 1)
+      grid.appendChild(cell(mList[4 * r + 3], mList, 4 * r + 3));
+      grid.appendChild(cell(mList[4 * r + 2], mList, 4 * r + 2));
+      grid.appendChild(cell(mList[4 * r + 1], mList, 4 * r + 1));
+      grid.appendChild(cell(mList[4 * r],     mList, 4 * r));
+
+      // Right side (Females): Center out (Col 5 -> Col 8)
+      grid.appendChild(cell(fList[4 * r],     fList, 4 * r));
+      grid.appendChild(cell(fList[4 * r + 1], fList, 4 * r + 1));
+      grid.appendChild(cell(fList[4 * r + 2], fList, 4 * r + 2));
+      grid.appendChild(cell(fList[4 * r + 3], fList, 4 * r + 3));
+    }
   }
+
+  renderModalGrid(males, females, rows);
   $('sel-count').textContent = 'Đã chọn: 0';
   $('modal-player').hidden = false;
 }

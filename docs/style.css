@@ -2,47 +2,211 @@
    Static layout & chrome use Tailwind utilities in index.html. */
 
 /* [hidden] must beat Tailwind's flex/grid utilities since JS toggles el.hidden */
-[hidden] { display: none !important; }
-
-/* Gift cover: 10x10 dark cells that fade off (spiral) to reveal the video */
-#gift-cover { display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr); }
-#gift-cover .cell { background: #0b1220; transition: opacity .6s ease; }
-#gift-cover .cell.off { opacity: 0; }
-#gift-pct { text-shadow: 2px 2px 6px rgba(0,0,0,.85); }
-
-/* Quest buttons (built by app.js) */
-.quest-btn { color: #fff; border: none; border-radius: 16px; padding: 16px 12px; font-size: 1.3rem; font-weight: bold; cursor: pointer; box-shadow: 0 5px 0 rgba(0,0,0,.35); flex: 1 1 130px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-.quest-btn:hover { filter: brightness(1.1); }
-.quest-btn .q-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.2; }
-.quest-btn.q-red { background: linear-gradient(#f87171, #dc2626); }
-.quest-btn.q-yellow { background: linear-gradient(#fbbf24, #d97706); }
-.quest-btn.q-green { background: linear-gradient(#4ade80, #16a34a); }
-.quest-btn.q-gray { background: linear-gradient(#9ca3af, #6b7280); }
-.quest-btn.done { opacity: .45; pointer-events: none; }
-
-/* Player grid cells (built by app.js) */
-#player-grid .cell { background: #37466f; border: 2px solid transparent; border-radius: 10px; padding: 14px 6px; font-size: 1.2rem; cursor: pointer; color: #fff; word-break: break-word; }
-#player-grid .cell.selected { background: #16a34a; border-color: #86efac; }
-
-/* "+ N điểm" float after completing a quest */
-#pts-float { position: fixed; left: 50%; top: 30%; transform: translateX(-50%); font-size: 3rem; font-weight: 900; color: #fde047; text-shadow: 2px 2px 8px rgba(0,0,0,.6); z-index: 60; pointer-events: none; opacity: 0; }
-#pts-float.show { animation: float-up 1.6s ease forwards; }
-@keyframes float-up {
-  0% { opacity: 0; transform: translate(-50%, 14px) scale(.7); }
-  20% { opacity: 1; transform: translate(-50%, 0) scale(1.15); }
-  70% { opacity: 1; }
-  100% { opacity: 0; transform: translate(-50%, -44px) scale(1); }
+[hidden] {
+  display: none !important;
 }
 
-@keyframes pop { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+/* Gift cover: 10x10 dark cells that fade off (spiral) to reveal the video */
+#gift-cover {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+}
+
+#gift-cover .cell {
+  background: #0b1220;
+  transition: opacity .6s ease;
+}
+
+#gift-cover .cell.off {
+  opacity: 0;
+}
+
+#gift-pct {
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, .85);
+}
+
+/* Quest buttons (built by app.js) */
+.quest-btn {
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 16px 12px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, .35);
+  flex: 1 1 130px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.quest-btn:hover {
+  filter: brightness(1.1);
+}
+
+.quest-btn .q-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+.quest-btn.q-red {
+  background: linear-gradient(#f87171, #dc2626);
+}
+
+.quest-btn.q-yellow {
+  background: linear-gradient(#fbbf24, #d97706);
+}
+
+.quest-btn.q-green {
+  background: linear-gradient(#4ade80, #16a34a);
+}
+
+.quest-btn.q-gray {
+  background: linear-gradient(#9ca3af, #6b7280);
+}
+
+.quest-btn.done {
+  opacity: .45;
+  pointer-events: none;
+}
+
+/* Player grid cells (built by app.js) */
+/* Player grid cells on white background */
+#player-grid .cell {
+  background: #f1f5f9;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 14px 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #1e293b;
+  word-break: break-word;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+#player-grid .cell:hover {
+  background: #e2e8f0;
+}
+
+#player-grid .cell.selected {
+  background: #16a34a;
+  border-color: #15803d;
+  color: #ffffff;
+}
+
+/* Drag and Drop styling */
+#player-grid .cell[draggable="true"] {
+  cursor: grab;
+}
+#player-grid .cell.dragging {
+  opacity: 0.4;
+  border: 2px dashed #3b82f6;
+}
+#player-grid .cell.drag-over {
+  border: 2px solid #2563eb;
+  transform: scale(1.03);
+}
+
+/* "+ N điểm" float after completing a quest */
+#pts-float {
+  position: fixed;
+  left: 50%;
+  top: 30%;
+  transform: translateX(-50%);
+  font-size: 3rem;
+  font-weight: 900;
+  color: #fde047;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, .6);
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#pts-float.show {
+  animation: float-up 1.6s ease forwards;
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(.7);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.15);
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -44px) scale(1);
+  }
+}
+
+@keyframes pop {
+  from {
+    transform: scale(.8);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
 
 /* Ranking table cells (built by app.js) + top-3 highlight */
-#ranking-top td, #ranking-body td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,.15); }
-#ranking-top tbody tr:nth-child(1) td { background: rgba(253,224,71,.20); }
-#ranking-top tbody tr:nth-child(2) td { background: rgba(226,232,240,.16); }
-#ranking-top tbody tr:nth-child(3) td { background: rgba(214,158,46,.18); }
+#ranking-top td,
+#ranking-body td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, .15);
+}
+
+#ranking-top tbody tr:nth-child(1) td {
+  background: rgba(253, 224, 71, .20);
+}
+
+#ranking-top tbody tr:nth-child(2) td {
+  background: rgba(226, 232, 240, .16);
+}
+
+#ranking-top tbody tr:nth-child(3) td {
+  background: rgba(214, 158, 46, .18);
+}
 
 /* Confetti */
-#confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden; }
-.confetto { position: absolute; top: -20px; width: 12px; height: 18px; animation: fall linear forwards; }
-@keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+#confetti-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.confetto {
+  position: absolute;
+  top: -20px;
+  width: 12px;
+  height: 18px;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(110vh) rotate(720deg);
+  }
+}
